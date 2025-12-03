@@ -1,6 +1,3 @@
-
-
-```markdown
 # MyHero - Flutter 2D 像素风游戏
 
 ![banner](show/4.gif)
@@ -217,5 +214,4 @@ MIT License
 * [itch.io](https://itch.io)
 * [Holopix AI](https://holopix.cn)
 
-```
 
