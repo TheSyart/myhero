@@ -3,5 +3,5 @@ enum HeroState {
   run,
   attack,
   hurt,
-  die,
+  dead,
 }

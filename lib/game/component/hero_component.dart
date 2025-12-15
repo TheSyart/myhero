@@ -1,9 +1,13 @@
 import 'package:myhero/game/my_game.dart';
+import 'package:myhero/game/component/door_component.dart';
 import 'package:flame/sprite.dart';
 import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 import '../state/hero_state.dart';
 import 'wall_component.dart';
+import '../../component/dialog_component.dart';
+import 'blocker_component.dart';
+
 
 class HeroComponent extends SpriteAnimationComponent
     with HasGameReference<MyGame>, CollisionCallbacks {
@@ -11,6 +15,9 @@ class HeroComponent extends SpriteAnimationComponent
 
   // 每秒移动速度
   double speed = 160;
+
+  // 生命值
+  int hp = 5;
 
   // 动画状态机
   HeroState state = HeroState.idle;
@@ -20,8 +27,49 @@ class HeroComponent extends SpriteAnimationComponent
   bool facingRight = true;
 
   // 保留这个用于性能优化
-  final Set<WallComponent> _nearbyWalls = {};
+  final Set<BlockerComponent> _nearbyBlockers = {};
   late RectangleHitbox _hitbox;
+
+  // 存 keyId
+  final Set<String> keys = {};
+  void addKey(String keyId) {
+    keys.add(keyId);
+    UiNotify.showToast(game, '获得钥匙: $keyId');
+  }
+
+  bool hasKey(String keyId) => keys.contains(keyId);
+
+  void loseHp(int amount) {
+    hp = hp - amount;
+
+    if (hp <= 0) {
+      UiNotify.showToast(game, '死亡');
+    } else {
+      UiNotify.showToast(game, 'HP -$amount  剩余 $hp');
+    }
+  }
+
+  bool _isGameOver = false;
+  Future<void> gameOver() async {
+    if (_isGameOver) return;
+    _isGameOver = true;
+
+    // 播放死亡动画
+    if (animations.containsKey(HeroState.dead)) {
+      _setState(HeroState.dead);
+    }
+
+    // 等待 3 秒，让死亡动画播放
+    await Future.delayed(const Duration(seconds: 3));
+
+    // 显示重新开始弹窗
+    final exists = game.camera.viewport.children
+        .query<RestartOverlay>()
+        .isNotEmpty;
+    if (!exists) {
+      game.camera.viewport.add(RestartOverlay());
+    }
+  }
 
   @override
   Future<void> onLoad() async {
@@ -30,8 +78,12 @@ class HeroComponent extends SpriteAnimationComponent
 
     size = Vector2(100, 100);
     position = Vector2(1000, 1000);
+    _hitbox = RectangleHitbox.relative(
+      Vector2(0.5, 0.2), // 占组件宽高比例
+      parentSize: size,
+      position: Vector2(size.x * 0.25, size.y * 0.7), // 偏移
+    );
 
-    _hitbox = RectangleHitbox();
     add(_hitbox);
   }
 
@@ -44,6 +96,11 @@ class HeroComponent extends SpriteAnimationComponent
   @override
   void update(double dt) {
     super.update(dt);
+
+    if (hp <= 0) {
+      gameOver();
+      return;
+    }
 
     final joy = game.joystick;
 
@@ -61,18 +118,18 @@ class HeroComponent extends SpriteAnimationComponent
     position += movement;
 
     // 检测碰撞
-    if (_wouldCollideWithWalls()) {
+    if (_wouldCollideWithBlockers()) {
       position.setFrom(originalPosition);
 
       // X 轴滑动
       position.x += movement.x;
-      if (_wouldCollideWithWalls()) {
+      if (_wouldCollideWithBlockers()) {
         position.x = originalPosition.x;
       }
 
       // Y 轴滑动
       position.y += movement.y;
-      if (_wouldCollideWithWalls()) {
+      if (_wouldCollideWithBlockers()) {
         position.y = originalPosition.y;
       }
     }
@@ -84,26 +141,29 @@ class HeroComponent extends SpriteAnimationComponent
     }
   }
 
-  bool _wouldCollideWithWalls() {
+  bool _wouldCollideWithBlockers() {
     final heroRect = _hitbox.toAbsoluteRect();
 
-    // 优先使用游戏维护的墙体集合，避免依赖碰撞回调的延迟
-    for (final wall in game.walls) {
-      final wallHitboxes = wall.children.query<RectangleHitbox>();
-      if (wallHitboxes.isEmpty) continue;
-
-      final wallRect = wallHitboxes.first.toAbsoluteRect();
-      if (heroRect.overlaps(wallRect)) return true;
+    // 优先使用游戏维护的 blockers 集合
+    for (final blocker in game.blockers) {
+      if (blocker.collidesWith(heroRect)) return true;
     }
 
-    // 兼容：如果 game.walls 为空，退回使用附近墙体集合
-    if (game.walls.isEmpty) {
-      for (final wall in _nearbyWalls) {
-        final wallHitboxes = wall.children.query<RectangleHitbox>();
-        if (wallHitboxes.isEmpty) continue;
-        final wallRect = wallHitboxes.first.toAbsoluteRect();
-        if (heroRect.overlaps(wallRect)) return true;
+    // 检测关闭的门
+    for (final door in game.world.children.query<DoorComponent>()) {
+      print(door.isOpen);
+      print( door.collidesWith(heroRect));
+      print('-----');
+      if (!door.isOpen && door.collidesWith(heroRect)) {
+        print('尝试打开门');
+        door.attemptOpen(this);
+        if (!door.isOpen) return true;
       }
+    }
+
+    // 兼容附近 blockers
+    for (final nearby in _nearbyBlockers) {
+      if (nearby.collidesWith(heroRect)) return true;
     }
 
     return false;
@@ -115,16 +175,16 @@ class HeroComponent extends SpriteAnimationComponent
     PositionComponent other,
   ) {
     super.onCollisionStart(intersectionPoints, other);
-    if (other is WallComponent) {
-      _nearbyWalls.add(other);
+    if (other is BlockerComponent) {
+      _nearbyBlockers.add(other);
     }
   }
 
   @override
   void onCollisionEnd(PositionComponent other) {
     super.onCollisionEnd(other);
-    if (other is WallComponent) {
-      _nearbyWalls.remove(other);
+    if (other is BlockerComponent) {
+      _nearbyBlockers.remove(other);
     }
   }
 
@@ -169,6 +229,20 @@ class HeroComponent extends SpriteAnimationComponent
         from: 0,
         to: 8,
         loop: true,
+      ),
+      HeroState.attack: sheet.createAnimation(
+        row: 3,
+        stepTime: 0.10,
+        from: 0,
+        to: 7,
+        loop: true,
+      ),
+      HeroState.dead: sheet.createAnimation(
+        row: 6,
+        stepTime: 0.10,
+        from: 0,
+        to: 10,
+        loop: false,
       ),
     };
   }
