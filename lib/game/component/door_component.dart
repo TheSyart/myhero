@@ -22,7 +22,7 @@ class DoorComponent extends BlockerComponent with HasGameReference<MyGame> {
     sprite = await Sprite.load(isOpen ? 'open_door.png' : 'closed_door.png');
   }
 
-  void unlock() async {
+  void _unlock() async {
     if (!isOpen) {
       isOpen = true;
       sprite = await Sprite.load('open_door.png');
@@ -32,7 +32,7 @@ class DoorComponent extends BlockerComponent with HasGameReference<MyGame> {
 
   void attemptOpen(HeroComponent hero) {
     if (!isOpen && hero.hasKey(keyId)) {
-      unlock();
+      _unlock();
     } else if (!isOpen) {
       UiNotify.showToast(game, '需要钥匙 $keyId 才能打开');
     }

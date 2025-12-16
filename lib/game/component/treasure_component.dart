@@ -43,14 +43,14 @@ class TreasureComponent extends SpriteComponent
     }
   }
 
-  Future<void> open() async {
+  Future<void> _open() async {
     if (status == 'closed') {
       status = 'full';
       sprite = await Sprite.load('full_treasure.png');
     }
   }
 
-  Future<void> collect(HeroComponent hero) async {
+  Future<void> _collect(HeroComponent hero) async {
     if (status == 'full') {
       status = 'empty';
       sprite = await Sprite.load('empty_treasure.png');
@@ -60,7 +60,7 @@ class TreasureComponent extends SpriteComponent
 
   void attemptOpen(HeroComponent hero) {
     if (status == 'closed') {
-      open();
+      _open();
     } else if (status == 'full') {
       final exists = game.camera.viewport.children
           .query<DialogComponent>()
@@ -68,7 +68,7 @@ class TreasureComponent extends SpriteComponent
       if (!exists) {
         final dialog = DialogComponent.confirm(
           message: '是否拿取宝物',
-          onConfirm: () => collect(hero),
+          onConfirm: () => _collect(hero),
           onCancel: () {},
         );
         game.camera.viewport.add(dialog);

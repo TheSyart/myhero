@@ -7,6 +7,7 @@ import 'package:flame/components.dart';
 /// [tileSize] - 每个瓦片大小
 /// [scale] - 地图缩放
 /// [createComponent] - 创建每个碰撞块的方法
+/// [parent] - 父组件，用于添加生成的组件
 Future<void> addMergedTileLayerV2({
   required List<int> tileData,
   required int width,

@@ -19,6 +19,9 @@ class HeroComponent extends SpriteAnimationComponent
   // 生命值
   int hp = 5;
 
+  // 是否死亡
+  bool _isGameOver = false;
+
   // 动画状态机
   HeroState state = HeroState.idle;
   late Map<HeroState, SpriteAnimation> animations;
@@ -49,7 +52,6 @@ class HeroComponent extends SpriteAnimationComponent
     }
   }
 
-  bool _isGameOver = false;
   Future<void> gameOver() async {
     if (_isGameOver) return;
     _isGameOver = true;
@@ -59,8 +61,8 @@ class HeroComponent extends SpriteAnimationComponent
       _setState(HeroState.dead);
     }
 
-    // 等待 3 秒，让死亡动画播放
-    await Future.delayed(const Duration(seconds: 3));
+    // 等待 2 秒，让死亡动画播放
+    await Future.delayed(const Duration(seconds: 2));
 
     // 显示重新开始弹窗
     final exists = game.camera.viewport.children
@@ -151,11 +153,7 @@ class HeroComponent extends SpriteAnimationComponent
 
     // 检测关闭的门
     for (final door in game.world.children.query<DoorComponent>()) {
-      print(door.isOpen);
-      print( door.collidesWith(heroRect));
-      print('-----');
       if (!door.isOpen && door.collidesWith(heroRect)) {
-        print('尝试打开门');
         door.attemptOpen(this);
         if (!door.isOpen) return true;
       }

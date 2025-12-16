@@ -52,7 +52,6 @@ class MyGame extends FlameGame with HasCollisionDetection {
           final h = mapScale * obj.height;
           final keyComponent = KeyComponent(
             keyId: keyId,
-            // Tiled 对象坐标为左上或底对齐；这里使用底对齐放置更符合 tile 外观
             position: Vector2(x, y),
             size: Vector2(w, h),
           );
@@ -62,7 +61,7 @@ class MyGame extends FlameGame with HasCollisionDetection {
       }
     }
 
-    // ---- 处理 Item Layer 中的宝箱 ----
+    // ---- 处理 treasure Layer 中的宝箱 ----
     final treasureLayer = tiled.tileMap.getLayer<ObjectGroup>('treasure');
 
     if (treasureLayer != null) {
@@ -75,7 +74,6 @@ class MyGame extends FlameGame with HasCollisionDetection {
           final h = mapScale * obj.height;
           final treasureComponent = TreasureComponent(
             status: status,
-            // Tiled 对象坐标为左上或底对齐；这里使用底对齐放置更符合 tile 外观
             position: Vector2(x, y),
             size: Vector2(w, h),
           );
@@ -98,7 +96,6 @@ class MyGame extends FlameGame with HasCollisionDetection {
           final h = mapScale * obj.height;
           final thornComponent = ThornComponent(
             status: status,
-            // Tiled 对象坐标为左上或底对齐；这里使用底对齐放置更符合 tile 外观
             position: Vector2(x, y),
             size: Vector2(w, h),
           );
@@ -122,7 +119,6 @@ class MyGame extends FlameGame with HasCollisionDetection {
           final doorComponent = DoorComponent(
             keyId: keyId,
             isOpen: obj.properties['status']?.value == 'open' ? true : false,
-            // Tiled 对象坐标为左上或底对齐；这里使用底对齐放置更符合 tile 外观
             position: Vector2(x, y),
             size: Vector2(w, h),
           );
