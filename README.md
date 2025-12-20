@@ -55,7 +55,8 @@ lib/
 ├── game/
 │   ├── my_game.dart   // 游戏核心逻辑
 │   ├── component/     // 游戏组件（玩家、敌人、道具）
-│   └── state/         // 组件状态逻辑（Idle/Run/Attack/Die 等）
+│   ├── state/         // 组件状态逻辑（Idle/Run/Attack/Die 等）
+│   └── utils/         // 通用工具类 (AI, Physics)
 assets/
 └── images/            // 游戏图片资源（精灵图等）
 

@@ -1,9 +1,8 @@
 import 'package:flame/components.dart';
 import 'package:myhero/game/my_game.dart';
 import 'package:myhero/component/dialog_component.dart';
-import 'package:myhero/game/component/hero_component.dart';
+import 'package:myhero/game/character/hero_component.dart';
 import 'package:flame/collisions.dart';
-
 
 class TreasureComponent extends SpriteComponent
     with HasGameReference<MyGame>, CollisionCallbacks {
@@ -24,8 +23,8 @@ class TreasureComponent extends SpriteComponent
       status == 'closed'
           ? 'closed_treasure.png'
           : status == 'full'
-              ? 'full_treasure.png'
-              : 'empty_treasure.png',
+          ? 'full_treasure.png'
+          : 'empty_treasure.png',
     );
 
     _hitbox = RectangleHitbox();
@@ -59,6 +58,8 @@ class TreasureComponent extends SpriteComponent
   }
 
   void attemptOpen(HeroComponent hero) {
+    if (hero.isGenerate) return;
+    
     if (status == 'closed') {
       _open();
     } else if (status == 'full') {
@@ -76,4 +77,3 @@ class TreasureComponent extends SpriteComponent
     }
   }
 }
-

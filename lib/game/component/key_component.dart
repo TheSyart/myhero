@@ -1,4 +1,4 @@
-import 'package:myhero/game/component/hero_component.dart';
+import 'package:myhero/game/character/hero_component.dart';
 import 'package:flame/components.dart';
 import 'package:flame/collisions.dart';
 import 'package:myhero/game/my_game.dart';
