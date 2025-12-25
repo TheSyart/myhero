@@ -34,11 +34,39 @@ class BulletConfig {
 
 final Map<String, BulletConfig> bulletConfigs = {
   'fire_ball': BulletConfig(
-    speed: 200,
-    maxRange: 500,
+    speed: 500,
+    maxRange: 400,
     size: Vector2(64, 64),
     textureSize: Vector2(16, 16),
     spritePath: 'bullet/fire_ball.png',
+    animation: AnimationSpec(
+      row: 0,
+      stepTime: 0.1,
+      from: 0,
+      to: 30,
+      loop: true,
+    ),
+  ),
+  'bullet': BulletConfig(
+    speed: 500,
+    maxRange: 400,
+    size: Vector2(32, 32),
+    textureSize: Vector2(16, 16),
+    spritePath: 'bullet/bullet.png',
+    animation: AnimationSpec(
+      row: 0,
+      stepTime: 0.1,
+      from: 0,
+      to: 1,
+      loop: true,
+    ),
+  ),
+  'm20_rocket': BulletConfig(
+    speed: 500,
+    maxRange: 400,
+    size: Vector2(64, 64),
+    textureSize: Vector2(16, 16),
+    spritePath: 'bullet/m20_rocket.png',
     animation: AnimationSpec(
       row: 0,
       stepTime: 0.1,

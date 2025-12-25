@@ -13,6 +13,7 @@ import '../state/character_state.dart';
 import '../attack/factory/attack_hitbox_factory.dart';
 import '../attack/factory/generate_factory.dart';
 import '../state/attack_type.dart';
+import '../weapon/component/weapon_component.dart';
 import 'dart:ui';
 
 abstract class CharacterComponent extends SpriteAnimationComponent
@@ -38,6 +39,9 @@ abstract class CharacterComponent extends SpriteAnimationComponent
   bool isGenerate = false;
   PositionComponent? summonOwner;
   double followDistance = 150;
+
+  // --------- 武器 ---------
+  WeaponComponent? weapon;
 
   // ----------------- 召唤物AI逻辑 -----------------
   /// 更新召唤物AI行为
@@ -91,13 +95,24 @@ abstract class CharacterComponent extends SpriteAnimationComponent
     }
   }
 
+  // ----------------- 武器系统 -----------------
+  /// 装备武器
+  void equipWeapon(String weaponId) {
+    // 移除旧武器
+    weapon?.removeFromParent();
+
+    weapon = WeaponComponent(weaponId: weaponId, owner: this);
+    // 设置武器在人物合适位置
+    weapon!.position = Vector2(size.x / 3, size.y / 1.5);
+    add(weapon!);
+  }
+
   // ----------------- 攻击 -----------------
   void attack(int index, Type target) {
     if (isActionLocked) return;
 
     final spec = cfg.attack[index];
     playAttackAnimation(spec.animation);
-
 
     // 生成召唤物
     // TODO: 待优化

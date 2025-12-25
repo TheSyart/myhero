@@ -72,7 +72,7 @@ class DashHitbox extends AbstractAttackRect {
   ui.Rect getAttackRect() => toAbsoluteRect();
 
   @override
-  void onLockTargetFound(PositionComponent target) {
+  void onLockTargetFound() {
   }
 
   @override

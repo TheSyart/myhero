@@ -33,12 +33,14 @@ class MeleeHitbox extends AbstractAttackRect {
     required Type targetType,
     double duration = 0.2,
     bool removeOnHit = true,
+    PositionComponent? target,
   }) : super(
          owner: owner,
          // 将传入的左上角坐标转换为中心坐标以便旋转
          position: position + size / 2,
          size: size,
          damage: damage,
+         target: target,
          targetType: targetType,
          duration: duration,
          removeOnHit: removeOnHit,
@@ -53,13 +55,15 @@ class MeleeHitbox extends AbstractAttackRect {
   ui.Rect getAttackRect() => hitbox.toAbsoluteRect();
 
   @override
-  void onLockTargetFound(PositionComponent target) {
+  void onLockTargetFound() {
     final ui.Rect rect = getAttackRect();
     final Vector2 center = Vector2(
       rect.left + rect.width / 2,
       rect.top + rect.height / 2,
     );
-    angle = angleToTarget(target, center);
+    if (target != null) {
+      angle = angleToTarget(target!, center);
+    }
   }
 
   @override
@@ -68,7 +72,10 @@ class MeleeHitbox extends AbstractAttackRect {
   @override
   void update(double dt) {
     super.update(dt);
-    autoLockNearestTarget();
+    // 近战：如果有目标则朝向目标，否则保持当前角度
+    if (target != null) {
+      onLockTargetFound();
+    }
 
     _timer += dt;
     if (_timer >= duration) {

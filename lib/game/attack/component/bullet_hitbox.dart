@@ -5,6 +5,7 @@ import 'package:myhero/game/config/bullet_config.dart';
 import 'package:myhero/game/attack/component/abstract_attack_rect.dart';
 import '../../../manager/audio_manager.dart';
 import 'dart:ui' as ui;
+import 'dart:math';
 
 /// 远程投射物攻击组件 (Bullet Hitbox)
 ///
@@ -31,7 +32,6 @@ class BulletHitbox extends AbstractAttackRect {
   Vector2 direction;
 
   double _distanceTraveled = 0;
-  bool _locked = false;
 
   BulletHitbox({
     required this.config,
@@ -40,18 +40,22 @@ class BulletHitbox extends AbstractAttackRect {
     required Type targetType,
     required int damage,
     required Vector2 position,
+    PositionComponent? target,
   }) : super(
          owner: owner,
          position: position,
          size: config.size,
          damage: damage,
          targetType: targetType,
+         target: target,
          duration: config.maxRange / config.speed,
          removeOnHit: !config.penetrate,
          anchor: Anchor.center,
        ) {
     add(RectangleHitbox()..collisionType = CollisionType.active);
   }
+
+  bool _locked = false;
 
   @override
   ui.Rect getAttackRect() => ui.Rect.fromLTWH(
@@ -62,25 +66,15 @@ class BulletHitbox extends AbstractAttackRect {
   );
 
   @override
-  void onLockTargetFound(PositionComponent target) {
+  void onLockTargetFound() {
     // 设置从人物到最近敌人的直线方向
     final Vector2 origin = position.clone();
-    final Vector2 targetPos = target.position.clone();
+    final Vector2 targetPos = target?.position.clone() ?? origin;
     direction = (targetPos - origin).normalized();
-    _locked = true;
   }
 
   @override
-  void onNoTargetFound() {
-    // 子弹攻击：若无目标，且尚未锁定方向，则尝试使用摇杆方向
-    // 如果摇杆也无输入，保持初始 direction
-    if (!_locked && !game.joystick.delta.isZero()) {
-      direction = game.joystick.delta.normalized();
-    }
-    // 无论是否使用了摇杆方向，只要进入这里（说明没找到敌人），就锁定方向。
-    // 防止后续飞行中因为摇杆变动而改变方向。
-    _locked = true;
-  }
+  void onNoTargetFound() {}
 
   @override
   Future<void> onLoad() async {
@@ -114,9 +108,18 @@ class BulletHitbox extends AbstractAttackRect {
   @override
   void update(double dt) {
     super.update(dt);
+
     if (!_locked) {
-      autoLockNearestTarget();
+      if (target != null) {
+        onLockTargetFound();
+      } else {
+        onNoTargetFound();
+      }
+      _locked = true;
+      // Rotate bullet to face movement direction
+      angle = atan2(direction.y, direction.x);
     }
+
     final moveStep = direction * config.speed * dt;
     position += moveStep;
     _distanceTraveled += moveStep.length;
@@ -125,6 +128,4 @@ class BulletHitbox extends AbstractAttackRect {
       removeFromParent();
     }
   }
-
-  // Collision handled by AbstractAttackRect
 }

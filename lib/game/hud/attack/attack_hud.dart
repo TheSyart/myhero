@@ -1,7 +1,8 @@
 import 'package:flame/components.dart';
-import 'attack_button.dart';
 import '../../character/hero_component.dart';
 import '../../character/monster_component.dart';
+import 'attack_button.dart';
+import 'weapon_button.dart';
 import 'dart:math' as math;
 
 class AttackHud extends PositionComponent {
@@ -35,20 +36,15 @@ class AttackHud extends PositionComponent {
       for (int i = 0; i < count; i++) {
         Vector2 position;
 
-        // 普通攻击放中间
-        if (i == 0) {
-          position = Vector2.zero();
-        } else {
-          final skillIndex = i - 1;
-          final skillCount = count - 1;
+        final skillIndex = i - 1;
+        final skillCount = count - 1;
 
-          final t = skillCount <= 1 ? 0.5 : skillIndex / (skillCount - 1);
+        final t = skillCount <= 1 ? 0.5 : skillIndex / (skillCount - 1);
 
-          final deg = startDeg + (endDeg - startDeg) * t;
-          final rad = deg * math.pi / 180.0;
+        final deg = startDeg + (endDeg - startDeg) * t;
+        final rad = deg * math.pi / 180.0;
 
-          position = Vector2(math.cos(rad), math.sin(rad)) * radius;
-        }
+        position = Vector2(math.cos(rad), math.sin(rad)) * radius;
 
         buttonGroup.add(
           AttackButton(
@@ -60,10 +56,23 @@ class AttackHud extends PositionComponent {
       }
     }
 
+    final weapon = hero.weapon;
+    final weaponIcon = weapon?.config.attack.icon ?? '';
+    final weaponButton = WeaponButton(
+      hero: hero,
+      icon: weaponIcon,
+      onPressed: () => _weaponAttack(),
+    )..position = Vector2.zero();
+    buttonGroup.add(weaponButton);
+
     add(buttonGroup);
   }
 
   void _attack(int index) {
     hero.attack(index, MonsterComponent);
+  }
+
+  void _weaponAttack() {
+    hero.weapon?.attack();
   }
 }

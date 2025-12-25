@@ -16,11 +16,11 @@ import 'animation_spec.dart';
 /// buffs 攻击 buffs
 /// icon 攻击图标
 
-
 class AttackSpec {
   final String id;
   final int damage;
   final double duration;
+  final double? interval;
   final AttackType type;
   final Vector2 sizeRel;
   final Vector2 centerOffsetRel;
@@ -40,6 +40,7 @@ class AttackSpec {
     required this.type,
     required this.sizeRel,
     required this.centerOffsetRel,
+    this.interval,
     this.animation,
     this.bullet,
     this.dashSpeed,

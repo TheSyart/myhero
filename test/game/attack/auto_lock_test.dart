@@ -118,7 +118,7 @@ void main() {
       expect(bullet.position.x > prevX, isTrue);
     });
 
-    testWithGame<TestMyGame>('Max lock distance and joystick fallback', () {
+    testWithGame<TestMyGame>('Bullet ignores joystick and keeps initial direction', () {
       return TestMyGame();
     }, (game) async {
        // 准备贴图
@@ -157,22 +157,15 @@ void main() {
         position: hero.position.clone(),
       );
       // 手动设置最大锁定距离小于怪物距离
-      // BulletHitbox 没有暴露 maxLockDistance 参数，需要通过 AbstractAttackRect 的构造传参
-      // 这里我们在 BulletHitbox 的构造函数里没有加 maxLockDistance 参数传递，
-      // 但默认值是 300，怪物在 400，应该无法锁定。
-      
+      // BulletHitbox 不会索敌，且忽略摇杆方向，应保持初始方向
+
       await game.ensureAdd(bullet);
       game.update(0.016);
 
-      // 验证：
-      // 1. 没有锁定怪物（方向不是 (1, 0) 指向怪物）
-      // 2. 而是使用了摇杆方向（向下 (0, 1)）
-      
-      final expectedDir = Vector2(0, 1);
-      
-      // 确保 bullet direction 被正确更新了
-      expect(bullet.direction.x, closeTo(expectedDir.x, 0.1));
-      expect(bullet.direction.y, closeTo(expectedDir.y, 0.1));
+      // 验证：忽略摇杆，保持初始方向 (1, 0)
+      final expectedDir = Vector2(1, 0);
+      expect(bullet.direction.x, closeTo(expectedDir.x, 0.001));
+      expect(bullet.direction.y, closeTo(expectedDir.y, 0.001));
     });
 
     testWithGame<TestMyGame>('Bullet locks direction on first frame even without input', () {

@@ -5,6 +5,7 @@ import 'blocker_component.dart';
 import 'package:myhero/component/dialog_component.dart';
 import 'package:myhero/game/character/character_component.dart';
 import 'package:myhero/manager/audio_manager.dart';
+
 class DoorComponent extends BlockerComponent with HasGameReference<MyGame> {
   final String keyId;
   bool isOpen;
@@ -28,14 +29,17 @@ class DoorComponent extends BlockerComponent with HasGameReference<MyGame> {
       isOpen = true;
       await AudioManager.playDoorOpen();
       sprite = await Sprite.load('open_door.png');
+
+      // 延迟一小段时间，模拟开门动画时间
+      await Future.delayed(const Duration(milliseconds: 20000));
+
       hitbox.removeFromParent();
     }
   }
 
   void attemptOpen(CharacterComponent character) {
     if (character is! HeroComponent) return;
-
-    if (!isOpen && character.hasKey(keyId)) {
+    if (!isOpen && character.hasKey(keyId) || keyId.isEmpty) {
       _unlock();
     } else if (!isOpen) {
       if (_knockCooldownLeft > 0) return;

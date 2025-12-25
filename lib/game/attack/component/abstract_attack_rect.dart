@@ -28,6 +28,7 @@ abstract class AbstractAttackRect extends PositionComponent
     with CollisionCallbacks, HasGameReference<MyGame> {
   int damage;
   PositionComponent owner;
+  PositionComponent? target;
   Type targetType;
   double duration;
   bool removeOnHit;
@@ -40,6 +41,7 @@ abstract class AbstractAttackRect extends PositionComponent
     required Vector2 size,
     required this.damage,
     required this.targetType,
+    PositionComponent? target,
     this.duration = 0.2,
     this.removeOnHit = true,
     this.maxLockDistance = 500.0,
@@ -50,78 +52,44 @@ abstract class AbstractAttackRect extends PositionComponent
          size: size,
          anchor: anchor,
          priority: priority,
-       );
+       ) {
+    this.target = target; // ✅ 关键
+
+  }
 
   /// 重置基础属性（用于对象池复用）
-  void resetBase({
-    required PositionComponent owner,
-    required Vector2 position,
-    required Vector2 size,
-    required int damage,
-    required Type targetType,
-    double duration = 0.2,
-    bool removeOnHit = true,
-    double maxLockDistance = 500.0,
-  }) {
-    this.owner = owner;
-    this.position.setFrom(position);
-    this.size.setFrom(size);
-    this.damage = damage;
-    this.targetType = targetType;
-    this.duration = duration;
-    this.removeOnHit = removeOnHit;
-    this.maxLockDistance = maxLockDistance;
-    _hitTargets.clear();
-  }
+void resetBase({
+  required PositionComponent owner,
+  required Vector2 position,
+  required Vector2 size,
+  required int damage,
+  required Type targetType,
+  PositionComponent? target,
+  double duration = 0.2,
+  bool removeOnHit = true,
+  double maxLockDistance = 500.0,
+}) {
+  this.owner = owner;
+  this.position.setFrom(position);
+  this.size.setFrom(size);
+  this.damage = damage;
+  this.targetType = targetType;
+  this.target = target;
+  this.duration = duration;
+  this.removeOnHit = removeOnHit;
+  this.maxLockDistance = maxLockDistance;
+  _hitTargets.clear();
+}
+
 
   /// 返回该组件用于判定的几何区域
   ui.Rect getAttackRect();
 
   /// 子类实现：当找到最近目标时的处理
-  void onLockTargetFound(PositionComponent target);
+  void onLockTargetFound();
 
   /// 子类实现：当未找到目标时的处理（如跟随摇杆方向）
   void onNoTargetFound();
-
-  /// 自动锁定最近目标
-  void autoLockNearestTarget() {
-    final PositionComponent? target = _findNearestTarget();
-    if (target != null) {
-      onLockTargetFound(target);
-    } else {
-      onNoTargetFound();
-    }
-  }
-
-  /// 最近目标查找
-  PositionComponent? _findNearestTarget() {
-    final List<PositionComponent> candidates = <PositionComponent>[];
-
-    if (targetType == HeroComponent) {
-      candidates.addAll(game.world.children.query<HeroComponent>());
-    } else if (targetType == MonsterComponent) {
-      candidates.addAll(game.world.children.query<MonsterComponent>());
-    }
-
-    candidates.removeWhere((c) => c == owner);
-    if (candidates.isEmpty) return null;
-
-    final Vector2 origin = owner.position.clone();
-
-    // 超出最大锁定距离过滤
-    candidates.removeWhere(
-      (c) => c.position.distanceTo(origin) > maxLockDistance,
-    );
-
-    if (candidates.isEmpty) return null;
-
-    candidates.sort(
-      (a, b) => a.position
-          .distanceTo(origin)
-          .compareTo(b.position.distanceTo(origin)),
-    );
-    return candidates.first;
-  }
 
   /// 计算到目标的朝向角度（弧度）
   double angleToTarget(PositionComponent target, Vector2 from) {

@@ -21,11 +21,19 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
+    - assets/audio/
     - assets/tiles/
+    - assets/images/tsx/
     - assets/images/character/
     - assets/images/bullet/
     - assets/images/button/
-    - assets/audio/
+    - assets/images/map/
+    - assets/images/weapon/AK47/
+    - assets/images/weapon/Glock-P80/
+    - assets/images/weapon/Revolver-Colt45/
+    - assets/images/weapon/Submachine-MP5A3/
+    - assets/images/weapon/Bazooka-M20/
+    
 flutter_launcher_icons:
   android: true
   ios: true

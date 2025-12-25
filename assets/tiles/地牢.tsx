@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tileset version="1.10" tiledversion="1.11.2" name="Tilemap Dungeon original size" tilewidth="8" tileheight="8" tilecount="2400" columns="60">
- <image source="../images/Tilemap Dungeon original size.png" width="480" height="320"/>
+ <image source="../images/tsx/Tilemap Dungeon original size.png" width="480" height="320"/>
  <tile id="120" probability="0.001"/>
  <tile id="121" probability="0.001"/>
  <tile id="180" probability="0.001"/>

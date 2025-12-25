@@ -96,22 +96,6 @@ final Map<String, CharacterConfig> _characterConfigs = {
     },
     attack: [
       AttackSpec(
-        id: 'common',
-        damage: 5,
-        duration: 0.2,
-        type: AttackType.melee,
-        sizeRel: Vector2(0.5, 2),
-        centerOffsetRel: Vector2(0, -1),
-        icon: 'button/sword.png',
-        animation: const AnimationSpec(
-          row: 3,
-          stepTime: 0.03,
-          from: 0,
-          to: 7,
-          loop: false,
-        ),
-      ),
-      AttackSpec(
         id: 'fire_ball',
         damage: 3,
         duration: 3,
@@ -292,7 +276,7 @@ final Map<String, CharacterConfig> _characterConfigs = {
     componentSize: Vector2(300, 300),
     maxHp: 40,
     attackValue: 1,
-    speed: 80,
+    speed: 0,
     hitbox: HitboxSpec(
       sizeRel: Vector2(0.0625, 0.05),
       posRel: Vector2(0.475, 0.525),
@@ -352,7 +336,7 @@ final Map<String, CharacterConfig> _characterConfigs = {
     componentSize: Vector2(300, 300),
     maxHp: 30,
     attackValue: 1,
-    speed: 120,
+    speed: 0,
     hitbox: HitboxSpec(
       sizeRel: Vector2(0.0625, 0.05),
       posRel: Vector2(0.475, 0.525),
@@ -412,7 +396,7 @@ final Map<String, CharacterConfig> _characterConfigs = {
     componentSize: Vector2(300, 300),
     maxHp: 40,
     attackValue: 1,
-    speed: 150,
+    speed: 0,
     hitbox: HitboxSpec(
       sizeRel: Vector2(0.0625, 0.05),
       posRel: Vector2(0.475, 0.525),
@@ -472,7 +456,7 @@ final Map<String, CharacterConfig> _characterConfigs = {
     componentSize: Vector2(300, 300),
     maxHp: 10,
     attackValue: 1,
-    speed: 200,
+    speed: 0,
     hitbox: HitboxSpec(
       sizeRel: Vector2(0.0625, 0.05),
       posRel: Vector2(0.475, 0.525),

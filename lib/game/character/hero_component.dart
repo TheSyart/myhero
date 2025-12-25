@@ -9,7 +9,8 @@ class HeroComponent extends CharacterComponent {
   final String heroId;
   final Vector2? birthPosition;
 
-  HeroComponent({this.heroId = 'hero_default', this.birthPosition}) : super(characterId: heroId);
+  HeroComponent({this.heroId = 'hero_default', this.birthPosition})
+    : super(characterId: heroId);
 
   // ----------------- 钥匙 -----------------
   final Set<String> keys = {};
@@ -32,7 +33,7 @@ class HeroComponent extends CharacterComponent {
     state = CharacterState.idle;
     animation = animations[state];
 
-    position = birthPosition ?? Vector2(1000, 1000);
+    position = birthPosition ?? size / 2;
 
     hitbox = RectangleHitbox.relative(
       cfg.hitbox.sizeRel,
@@ -69,6 +70,7 @@ class HeroComponent extends CharacterComponent {
     final joy = game.joystick;
     if (joy.direction == JoystickDirection.idle) {
       setState(CharacterState.idle);
+      // 如果没有输入，武器保持当前角度或归位（可选）
       return;
     }
 
@@ -78,7 +80,16 @@ class HeroComponent extends CharacterComponent {
 
     moveWithCollision(delta);
 
-    joy.relativeDelta.x > 0 ? faceRight() : faceLeft();
+    if (weapon?.enemyTarget == null) {
+      joy.relativeDelta.x > 0 ? faceRight() : faceLeft();
+
+      // 更新武器旋转
+      if (weapon != null && !joy.delta.isZero()) {
+        // 计算摇杆角度 (0为右，PI/2为下)
+        final angle = joy.delta.screenAngle();
+        weapon!.rotateByInput(angle);
+      }
+    }
   }
 
   // ----------------- 受击 -----------------
