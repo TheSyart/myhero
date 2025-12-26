@@ -300,7 +300,7 @@ class MapCombiner {
       ),
     );
 
-    List<String> middleMaps = mapFiles
+    List<String> battleMaps = mapFiles
         .where(
           (m) =>
               !m.endsWith('room_start.tmx') &&
@@ -310,7 +310,7 @@ class MapCombiner {
         )
         .toList();
 
-    if (middleMaps.isEmpty) middleMaps = [startMap];
+    if (battleMaps.isEmpty) battleMaps = [startMap];
 
     final int targetRooms = MIN_ROOMS + random.nextInt(MAX_ROOMS - MIN_ROOMS + 1); // MIN..MAX 个房间
     final Map<math.Point<int>, String> grid = {};
@@ -418,13 +418,13 @@ class MapCombiner {
 
     // 填充剩余房间
     for (final p in available) {
-      grid[p] = middleMaps[random.nextInt(middleMaps.length)];
+      grid[p] = battleMaps[random.nextInt(battleMaps.length)];
     }
 
     // 替换所有临时标记
     grid.forEach((key, value) {
       if (value == 'temp') {
-        grid[key] = middleMaps[random.nextInt(middleMaps.length)];
+        grid[key] = battleMaps[random.nextInt(battleMaps.length)];
       }
     });
 

@@ -182,7 +182,7 @@
  <objectgroup id="9" name="spawn_points">
   <object id="1" x="20" y="127.5" width="96" height="96">
    <properties>
-    <property name="mapId" value="地牢.tmx"/>
+    <property name="mapId" value="random_dungeon"/>
     <property name="type" value="portal"/>
    </properties>
    <ellipse/>
