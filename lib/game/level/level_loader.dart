@@ -13,7 +13,9 @@ import '../component/portal_component.dart';
 import '../my_game.dart';
 import 'map_combiner.dart';
 import 'dart:math';
+import '../state/map_type.dart';
 import 'package:flutter/foundation.dart';
+import 'logic/room_logic_registry.dart';
 
 /// 关卡加载器
 ///
@@ -60,7 +62,7 @@ class LevelLoader {
     tiled.priority = -100;
     world.add(tiled);
 
-    await _loadMapContent(tiled, Vector2.zero());
+    await _loadMapContent(tiled, Vector2.zero(), mapName: mapName);
 
     // ---------- camera ----------
     camera.setBounds(Rectangle.fromLTRB(0, 0, tiled.size.x, tiled.size.y));
@@ -86,7 +88,7 @@ class LevelLoader {
 
     if (combinedMap.segments.isEmpty) {
       print('Failed to generate dungeon, loading default home.tmx');
-      await load('home.tmx');
+      await load(MapType.home);
       return;
     }
 
@@ -97,6 +99,7 @@ class LevelLoader {
         segment.offset,
         angle: segment.angle,
         openings: segment.openings,
+        mapName: segment.mapName,
       );
     }
 
@@ -133,7 +136,13 @@ class LevelLoader {
     Vector2 offset, {
     double angle = 0,
     Set<String>? openings,
+    String? mapName,
   }) async {
+    // ---------- 0. Special Logic ----------
+    if (mapName != null) {
+      RoomLogicRegistry.executeStrategies(mapName, this, tiled, offset, angle);
+    }
+
     // ---------- 1. thorn ----------
     _loadThorn(tiled, offset, angle);
 
@@ -225,7 +234,7 @@ class LevelLoader {
         status: obj.properties['status']!.value as String,
         position: pos,
         size: size,
-      )..debugMode = true;
+      );
 
       game.world.add(c);
     }
@@ -244,7 +253,7 @@ class LevelLoader {
         keyId: obj.properties['keyId']!.value as String,
         position: pos,
         size: size,
-      )..debugMode = true;
+      );
 
       game.world.add(c);
     }
@@ -341,8 +350,7 @@ class LevelLoader {
       parent: game.world,
       createComponent: (pos, size) async {
         final (newPos, newSize) = _transformRect(pos, size, offset, angle);
-        final water = WaterComponent(position: newPos, size: newSize)
-          ..debugMode = true;
+        final water = WaterComponent(position: newPos, size: newSize);
         game.blockers.add(water);
         return water;
       },
@@ -366,8 +374,7 @@ class LevelLoader {
       parent: game.world,
       createComponent: (pos, size) async {
         final (newPos, newSize) = _transformRect(pos, size, offset, angle);
-        final wall = WallComponent(position: newPos, size: newSize)
-          ..debugMode = true;
+        final wall = WallComponent(position: newPos, size: newSize);
         game.blockers.add(wall);
         return wall;
       },
@@ -391,40 +398,35 @@ class LevelLoader {
     final layer = tiled.tileMap.getLayer<ObjectGroup>('spawn_points');
     if (layer == null) return;
 
+    final sites = <SpawnSite>[];
     for (final obj in layer.objects) {
       final type = obj.properties['type']?.value as String?;
-
       if (type == 'monster_spawn') {
         final (pos, size) = _getTransformedRect(obj, offset, angle);
-        final spawn = SpawnPointComponent(
+        final monsterId = obj.properties['monsterId']?.value as String?;
+        final perCount = obj.properties['perCount']?.value as int? ?? 3;
+        sites.add(SpawnSite(
           position: pos,
           size: size,
-          monsterId:
-              obj.properties['monsterId']?.value as String? ?? 'elite_orc',
-          maxCount: obj.properties['maxCount']?.value as int? ?? 3,
-          perCount: obj.properties['perCount']?.value as int? ?? 1,
-          productSpeed: Duration(
-            seconds: obj.properties['productSpeed']?.value as int? ?? 3,
-          ),
-        )..debugMode = true;
-
-        game.world.add(spawn);
-        spawn.start();
-      }
-
-      if (type == 'portal') {
+          monsterId: monsterId,
+          perCount: perCount,
+          type: type,
+        ));
+      } else if (type == 'portal') {
         final (pos, size) = _getTransformedRect(obj, offset, angle);
         final mapId = obj.properties['mapId']?.value as String? ?? 'home.tmx';
         final portal = PortalComponent(position: pos, size: size, mapId: mapId)
           ..debugMode = true;
-
         game.world.add(portal);
-      }
-
-      if (type == 'birthPoint') {
+      } else if (type == 'birthPoint') {
         final (pos, _) = _getTransformedRect(obj, offset, angle);
         heroBirthPoint = pos;
       }
+    }
+    if (sites.isNotEmpty) {
+      final manager = SpawnPointComponent(sites: sites)
+        ..debugMode = true;
+      game.world.add(manager);
     }
   }
 

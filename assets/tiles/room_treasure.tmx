@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" nextlayerid="12" nextobjectid="13">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" nextlayerid="13" nextobjectid="14">
  <tileset firstgid="1" source="地牢.tsx"/>
  <layer id="1" name="ground" width="40" height="40">
   <data encoding="csv">
@@ -160,6 +160,14 @@
     <property name="keyId" value=""/>
     <property name="status" value="closed"/>
     <property name="type" value="door"/>
+   </properties>
+  </object>
+ </objectgroup>
+ <objectgroup id="12" name="treasure">
+  <object id="13" x="144" y="144" width="32" height="32">
+   <properties>
+    <property name="status" value="closed"/>
+    <property name="type" value="treasure"/>
    </properties>
   </object>
  </objectgroup>

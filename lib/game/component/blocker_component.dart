@@ -11,13 +11,11 @@ abstract class BlockerComponent extends SpriteComponent
     required super.size,
     bool addHitbox = true,
   }) {
-    if (addHitbox) {
-      hitbox = RectangleHitbox.relative(
-        Vector2(1.0, 1.0),
-        parentSize: size,
-      );
-      add(hitbox);
-    }
+    hitbox = RectangleHitbox.relative(
+      Vector2(1.0, 1.0),
+      parentSize: size,
+    );
+    if (addHitbox) add(hitbox);
   }
 
 

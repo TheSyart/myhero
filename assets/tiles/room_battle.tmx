@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" nextlayerid="12" nextobjectid="12">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" nextlayerid="12" nextobjectid="29">
  <tileset firstgid="1" source="地牢.tsx"/>
  <layer id="1" name="ground" width="40" height="40">
   <data encoding="csv">
@@ -163,5 +163,78 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="9" name="spawn_points"/>
+ <objectgroup id="9" name="spawn_points">
+  <object id="12" x="37.2197" y="70.852">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="21" x="156.054" y="69.9552">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="22" x="276.682" y="69.0583">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="23" x="38.565" y="164.574">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="24" x="159.641" y="162.78">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="25" x="278.027" y="163.677">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="26" x="37.6682" y="259.193">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="27" x="160.538" y="258.296">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="28" x="280.269" y="258.744">
+   <properties>
+    <property name="monsterId" value=""/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+   <point/>
+  </object>
+ </objectgroup>
 </map>

@@ -8,6 +8,12 @@ import 'hud/attack/attack_hud.dart';
 import 'hud/minimap_hud.dart';
 import '../manager/audio_manager.dart';
 import 'level/level_loader.dart';
+import 'hud/pause_button_component.dart';
+import 'package:myhero/game/hud/coin_hud.dart';
+import 'package:myhero/component/dialog_component.dart';
+// import 'package:flame/input.dart';
+
+import 'state/map_type.dart';
 
 class MyGame extends FlameGame with HasCollisionDetection {
   late JoystickComponent joystick;
@@ -20,6 +26,7 @@ class MyGame extends FlameGame with HasCollisionDetection {
   static const double tileSize = 8.0;
   // 游戏运行时间
   double elapsedTime = 0;
+  bool isPaused = false;
 
   late LevelLoader levelLoader;
 
@@ -31,10 +38,9 @@ class MyGame extends FlameGame with HasCollisionDetection {
     AudioManager.startRegularBgm();
 
     levelLoader = LevelLoader(this);
-    await levelLoader.load('home.tmx');
+    await levelLoader.load(MapType.home);
 
-    hero = HeroComponent(birthPosition: levelLoader.heroBirthPoint)
-      ..debugMode = true;
+    hero = HeroComponent(birthPosition: levelLoader.heroBirthPoint);
     await world.add(hero);
 
     camera.follow(hero);
@@ -64,23 +70,66 @@ class MyGame extends FlameGame with HasCollisionDetection {
         ..anchor = Anchor.topRight
         ..position = Vector2(size.x - 20, 20),
     );
+    camera.viewport.add(
+      CoinHud()
+        ..anchor = Anchor.topRight
+        ..position = Vector2(size.x - 50, 20),
+    );
+    camera.viewport.add(
+      PauseButtonComponent()
+        ..anchor = Anchor.topRight
+        ..position = Vector2(size.x - 10, 20),
+    );
+  }
+
+  void pauseGame() {
+    isPaused = true;
+    AudioManager.pauseBgm();
+    final exists =
+        camera.viewport.children.query<PauseOverlay>().isNotEmpty;
+    if (!exists) {
+      camera.viewport.add(PauseOverlay());
+    }
+  }
+
+  void resumeGame() {
+    isPaused = false;
+    AudioManager.resumeBgm();
+    for (final o in camera.viewport.children.query<PauseOverlay>()) {
+      o.removeFromParent();
+    }
   }
 
   Future<void> restartGame() async {
-    resumeEngine();
+    // 恢复游戏状态
+    resumeGame();
+    
+    // 清理数据
     blockers.clear();
-    for (final c in List<Component>.from(world.children)) {
-      c.removeFromParent();
-    }
-    for (final c in List<Component>.from(camera.viewport.children)) {
-      c.removeFromParent();
-    }
+    elapsedTime = 0;
+
+    // 清理场景和UI
+    world.removeAll(world.children);
+    camera.viewport.removeAll(camera.viewport.children);
+
+    // 重新加载主城地图
+    await levelLoader.load(MapType.home);
+
+    // 重建英雄
+    hero = HeroComponent(birthPosition: levelLoader.heroBirthPoint);
+    await world.add(hero);
+
+    // 重置相机
+    camera.follow(hero);
+
+    // 重建UI
+    _initHud();
   }
 
   @override
   void update(double dt) {
-    // 游戏逻辑，每帧更新
-    super.update(dt);
+    final freezeDt = isPaused ? 0.0 : dt;
+    super.update(freezeDt);
     elapsedTime += dt;
   }
 

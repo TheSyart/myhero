@@ -9,6 +9,8 @@ import '../attack/spec/animation_spec.dart';
 /// spritePath 子弹精灵路径
 /// animation 子弹动画配置
 /// penetrate 是否穿透
+/// sizeRel 子弹大小相对值
+/// centerOffsetRel 子弹中心偏移相对值
 
 class BulletConfig {
   final double speed;
@@ -18,8 +20,10 @@ class BulletConfig {
   final String? spritePath;
   final AnimationSpec? animation;
   final bool penetrate;
+  final Vector2 sizeRel;
+  final Vector2 centerOffsetRel;
 
-  const BulletConfig({
+  BulletConfig({
     required this.speed,
     required this.maxRange,
     required this.size,
@@ -27,7 +31,10 @@ class BulletConfig {
     this.spritePath,
     this.animation,
     this.penetrate = false,
-  });
+    Vector2? sizeRel,
+    Vector2? centerOffsetRel,
+  }) : sizeRel = sizeRel ?? Vector2.all(0.5),
+       centerOffsetRel = centerOffsetRel ?? Vector2(0.5, 0.5);
 
   static BulletConfig? byId(String id) => bulletConfigs[id];
 }
@@ -53,13 +60,7 @@ final Map<String, BulletConfig> bulletConfigs = {
     size: Vector2(32, 32),
     textureSize: Vector2(16, 16),
     spritePath: 'bullet/bullet.png',
-    animation: AnimationSpec(
-      row: 0,
-      stepTime: 0.1,
-      from: 0,
-      to: 1,
-      loop: true,
-    ),
+    animation: AnimationSpec(row: 0, stepTime: 0.1, from: 0, to: 1, loop: true),
   ),
   'm20_rocket': BulletConfig(
     speed: 500,
@@ -74,5 +75,15 @@ final Map<String, BulletConfig> bulletConfigs = {
       to: 30,
       loop: true,
     ),
+  ),
+  'stone_ball': BulletConfig(
+    speed: 200,
+    maxRange: 1000,
+    size: Vector2(300, 300),
+    textureSize: Vector2(100, 100),
+    sizeRel: Vector2(0.4, 0.15),
+    centerOffsetRel: Vector2(0.8, 0.38),
+    spritePath: 'bullet/stone_ball.png',
+    animation: AnimationSpec(row: 0, stepTime: 0.1, from: 0, to: 3, loop: true),
   ),
 };

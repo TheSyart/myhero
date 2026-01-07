@@ -11,7 +11,7 @@ class HeroInfoPanel extends PositionComponent with HasGameReference<MyGame> {
   @override
   Future<void> onLoad() async {
     // 1. 头像
-    final portraitImage = await game.images.load('SPRITE_PORTRAIT.png');
+    final portraitImage = await game.images.load('hud/avatar.png');
     final avatar = SpriteComponent(
       sprite: Sprite(portraitImage),
       size: Vector2(60, 60),

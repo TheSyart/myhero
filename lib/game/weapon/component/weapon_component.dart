@@ -6,6 +6,8 @@ import 'package:myhero/game/character/hero_component.dart';
 import 'package:myhero/game/character/monster_component.dart';
 import '../../attack/factory/attack_hitbox_factory.dart';
 import 'dart:math';
+import 'package:flame/collisions.dart';
+import '../../interaction/promptable_interactable_mixin.dart';
 
 class WeaponComponent extends SpriteComponent with HasGameReference<MyGame> {
   final String weaponId;
@@ -119,5 +121,130 @@ class WeaponComponent extends SpriteComponent with HasGameReference<MyGame> {
     double angleRad = atan2(dy, dx);
 
     rotateToWorldAngle(angleRad);
+  }
+
+  /// 生成随机武器掉落物
+  /// [position] 掉落位置
+  static PositionComponent generateRandomWeapon(Vector2 position) {
+    final random = Random();
+    final keys = weaponConfigs.keys.toList();
+    if (keys.isEmpty) {
+      // 如果没有配置武器，返回一个空组件或抛出异常
+      // 这里为了安全返回一个空组件
+      return PositionComponent(position: position);
+    }
+
+    // 随机选择一个武器ID
+    final weaponId = keys[random.nextInt(keys.length)];
+
+    // 创建掉落物组件
+    return WeaponDropComponent(weaponId: weaponId, position: position);
+  }
+}
+
+/// 武器掉落物组件
+/// 玩家触碰后可拾取
+class WeaponDropComponent extends SpriteComponent
+    with HasGameReference<MyGame>, CollisionCallbacks, PromptableInteractable {
+  final String weaponId;
+  final WeaponConfig config;
+
+  // 浮动动画参数
+  double _elapsed = 0;
+  final double _amplitude = 5.0;
+  final double _period = 1.5;
+  late final double _baseY;
+
+  WeaponDropComponent({required this.weaponId, required Vector2 position})
+    : config = WeaponConfig.byId(weaponId)!,
+      super(position: position, anchor: Anchor.center);
+
+  @override
+  String get promptText => weaponId;
+
+  @override
+  bool get show => this.isRemoved == false;
+
+  @override
+  void onInteract(HeroComponent hero) {
+    // 检查当前是否有武器
+    final oldWeaponId = hero.weapon?.weaponId;
+
+    // 玩家拾取武器
+    hero.equipWeapon(weaponId);
+
+    // 如果有旧武器，生成掉落物
+    if (oldWeaponId != null) {
+      // 在玩家当前位置生成旧武器掉落
+      final drop = WeaponDropComponent(
+        weaponId: oldWeaponId,
+        position: hero.position.clone(),
+      );
+      game.world.add(drop);
+    }
+
+    // 播放拾取音效 (如果 AudioManager 支持)
+    // AudioManager.playPickup();
+
+    // 移除当前掉落物
+    removeFromParent();
+    if (!show) {
+      hero.setInteractable(null);
+      onExitInteraction(hero);
+    }
+  }
+
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    sprite = await game.loadSprite(config.spritePath);
+    size = config.size;
+    _baseY = position.y;
+
+    // 添加碰撞盒
+    add(RectangleHitbox(isSolid: true));
+
+    // 调试模式显示碰撞盒
+    debugMode = true;
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+
+    // 简单的上下浮动效果
+    _elapsed += dt;
+    final omega = 2 * pi / _period;
+    final offset = sin(_elapsed * omega) * _amplitude;
+    position.y = _baseY + offset;
+  }
+
+  @override
+  void onCollisionStart(
+    Set<Vector2> intersectionPoints,
+    PositionComponent other,
+  ) {
+    super.onCollisionStart(intersectionPoints, other);
+
+    if (other is HeroComponent) {
+      try {
+        if (show) {
+          other.setInteractable(this); // 通知 Hero
+          onEnterInteraction(other);
+        }
+      } catch (e) {
+        print('Error equipping weapon: $e');
+      }
+    }
+  }
+
+  @override
+  void onCollisionEnd(PositionComponent other) {
+    super.onCollisionEnd(other);
+
+    if (other is HeroComponent) {
+      other.setInteractable(null);
+      onExitInteraction(other); // 隐藏提示
+    }
   }
 }

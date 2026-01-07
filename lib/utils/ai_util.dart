@@ -4,6 +4,7 @@ import 'package:myhero/game/character/character_component.dart';
 import 'package:myhero/game/character/hero_component.dart';
 import 'package:myhero/game/character/monster_component.dart';
 import 'package:myhero/game/state/character_state.dart';
+import 'package:myhero/game/state/attack_type.dart';
 
 class AiUtil {
   /// 更新召唤物AI行为
@@ -126,7 +127,8 @@ class AiUtil {
 
     // 进入攻击范围
     if (distance <= monster.attackRange) {
-      monster.attack(0, HeroComponent);
+      final idx = _pickMonsterAttackIndex(monster, distance);
+      monster.attack(idx, HeroComponent);
       return;
     }
 
@@ -140,5 +142,32 @@ class AiUtil {
     monster.moveWithCollision(delta);
 
     direction.x >= 0 ? monster.faceRight() : monster.faceLeft();
+  }
+
+  static int _pickMonsterAttackIndex(MonsterComponent monster, double distance) {
+    final attacks = monster.cfg.attack;
+    if (attacks.isEmpty) return 0;
+    if (attacks.length == 1) return 0;
+    final weights = <double>[];
+    for (int i = 0; i < attacks.length; i++) {
+      double w = 1.0;
+      if (i == 0) w += 0.5;
+      final t = attacks[i].type;
+      if (t == AttackType.melee || t == AttackType.dash) {
+        w += 0.5;
+      }
+      weights.add(w);
+    }
+    double sum = 0;
+    for (final w in weights) {
+      sum += w;
+    }
+    double r = monster.rng.nextDouble() * sum;
+    double acc = 0;
+    for (int i = 0; i < weights.length; i++) {
+      acc += weights[i];
+      if (r <= acc) return i;
+    }
+    return 0;
   }
 }

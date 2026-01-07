@@ -4,6 +4,7 @@ import 'package:flame/collisions.dart';
 import 'package:myhero/game/my_game.dart';
 import 'package:myhero/game/character/hero_component.dart';
 import 'package:myhero/game/character/monster_component.dart';
+import 'package:myhero/game/character/character_component.dart';
 import 'dart:ui' as ui;
 
 /// 攻击判定组件基类 (Abstract Attack Hitbox)
@@ -54,33 +55,76 @@ abstract class AbstractAttackRect extends PositionComponent
          priority: priority,
        ) {
     this.target = target; // ✅ 关键
+  }
 
+  @override
+  Future<void> onLoad() async {
+    await super.onLoad();
+    autoLockNearestTarget();
+  }
+
+  /// 自动索敌逻辑
+  void autoLockNearestTarget() {
+    if (target != null) {
+      onLockTargetFound();
+      return;
+    }
+
+    PositionComponent? nearest;
+    double minDistance = double.infinity;
+
+    final Iterable<PositionComponent> candidates;
+    if (targetType == HeroComponent) {
+      candidates = game.world.children.query<HeroComponent>();
+    } else if (targetType == MonsterComponent) {
+      candidates = game.world.children.query<MonsterComponent>();
+    } else {
+      candidates = [];
+    }
+
+    for (final candidate in candidates) {
+      if (candidate == owner) continue;
+
+      if (candidate is CharacterComponent && candidate.isDead) continue;
+
+      final double distance = position.distanceTo(candidate.position);
+      if (distance < minDistance && distance <= maxLockDistance) {
+        minDistance = distance;
+        nearest = candidate;
+      }
+    }
+
+    if (nearest != null) {
+      target = nearest;
+      onLockTargetFound();
+    } else {
+      onNoTargetFound();
+    }
   }
 
   /// 重置基础属性（用于对象池复用）
-void resetBase({
-  required PositionComponent owner,
-  required Vector2 position,
-  required Vector2 size,
-  required int damage,
-  required Type targetType,
-  PositionComponent? target,
-  double duration = 0.2,
-  bool removeOnHit = true,
-  double maxLockDistance = 500.0,
-}) {
-  this.owner = owner;
-  this.position.setFrom(position);
-  this.size.setFrom(size);
-  this.damage = damage;
-  this.targetType = targetType;
-  this.target = target;
-  this.duration = duration;
-  this.removeOnHit = removeOnHit;
-  this.maxLockDistance = maxLockDistance;
-  _hitTargets.clear();
-}
-
+  void resetBase({
+    required PositionComponent owner,
+    required Vector2 position,
+    required Vector2 size,
+    required int damage,
+    required Type targetType,
+    PositionComponent? target,
+    double duration = 0.2,
+    bool removeOnHit = true,
+    double maxLockDistance = 500.0,
+  }) {
+    this.owner = owner;
+    this.position.setFrom(position);
+    this.size.setFrom(size);
+    this.damage = damage;
+    this.targetType = targetType;
+    this.target = target;
+    this.duration = duration;
+    this.removeOnHit = removeOnHit;
+    this.maxLockDistance = maxLockDistance;
+    _hitTargets.clear();
+  }
 
   /// 返回该组件用于判定的几何区域
   ui.Rect getAttackRect();

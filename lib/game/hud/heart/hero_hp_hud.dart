@@ -19,7 +19,7 @@ class HeroHpHud extends PositionComponent with HasGameReference<MyGame> {
 
   @override
   Future<void> onLoad() async {
-    final image = await game.images.load('heart_animated_1.png');
+    final image = await game.images.load('hud/heart.png');
 
     heartSprites = List.generate(
       hpPerHeart + 1, // 包含空心

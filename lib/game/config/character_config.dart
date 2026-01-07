@@ -6,21 +6,11 @@ import '../state/character_state.dart';
 import '../attack/spec/hit_box_spec.dart';
 import 'bullet_config.dart';
 
-/// 角色配置
-/// id 角色id
-/// spritePath 角色sprite路径
-/// cellSize 角色sprite单元格大小
-/// componentSize 角色组件大小
-/// maxHp 最大生命值
-/// attackValue 攻击值
-/// speed 移动速度
-/// detectRadius 检测半径
-/// attackRange 攻击范围
-/// hitbox 人物体型碰撞框
-/// animations 动画
-/// attack 攻击列表
+enum CharacterRace { hero, orc, human, boss }
+
 class CharacterConfig {
   final String id;
+  final CharacterRace race;
   final String spritePath;
   final Vector2 cellSize;
   final Vector2 componentSize;
@@ -35,6 +25,7 @@ class CharacterConfig {
 
   const CharacterConfig({
     required this.id,
+    required this.race,
     required this.spritePath,
     required this.cellSize,
     required this.componentSize,
@@ -49,11 +40,24 @@ class CharacterConfig {
   });
 
   static CharacterConfig? byId(String id) => _characterConfigs[id];
+  static Map<String, CharacterConfig> byRace(CharacterRace race) =>
+      _raceConfigs[race] ?? const {};
+  static List<CharacterConfig> listByRace(CharacterRace race) =>
+      (_raceConfigs[race]?.values.toList()) ?? const [];
+
+  static String get randomMonsterId {
+    final monsters = _characterConfigs.values
+        .where((c) => c.race != CharacterRace.hero)
+        .toList();
+    if (monsters.isEmpty) return 'elite_orc'; // Fallback
+    return monsters[DateTime.now().millisecond % monsters.length].id;
+  }
 }
 
 final Map<String, CharacterConfig> _characterConfigs = {
   'hero_default': CharacterConfig(
     id: 'hero_default',
+    race: CharacterRace.hero,
     spritePath: 'character/Satyr.png',
     cellSize: Vector2(32, 32),
     componentSize: Vector2(100, 100),
@@ -134,7 +138,7 @@ final Map<String, CharacterConfig> _characterConfigs = {
         damage: 0,
         duration: 0,
         type: AttackType.generate,
-        sizeRel: Vector2(0, 0),
+        sizeRel: Vector2(1, 1),
         centerOffsetRel: Vector2(0, 0),
         icon: 'button/generate.png',
         generateId: 'hero_friend',
@@ -150,6 +154,7 @@ final Map<String, CharacterConfig> _characterConfigs = {
   ),
   'hero_friend': CharacterConfig(
     id: 'hero_friend',
+    race: CharacterRace.hero,
     spritePath: 'character/Satyr Friend.png',
     cellSize: Vector2(32, 32),
     componentSize: Vector2(100, 100),
@@ -211,6 +216,7 @@ final Map<String, CharacterConfig> _characterConfigs = {
   ),
   'armored_axeman': CharacterConfig(
     id: 'armored_axeman',
+    race: CharacterRace.human,
     spritePath: 'character/Armored Axeman.png',
     cellSize: Vector2(100, 100),
     componentSize: Vector2(300, 300),
@@ -271,12 +277,13 @@ final Map<String, CharacterConfig> _characterConfigs = {
   ),
   'armored_orc': CharacterConfig(
     id: 'armored_orc',
+    race: CharacterRace.orc,
     spritePath: 'character/Armored Orc.png',
     cellSize: Vector2(100, 100),
     componentSize: Vector2(300, 300),
     maxHp: 40,
     attackValue: 1,
-    speed: 0,
+    speed: 80,
     hitbox: HitboxSpec(
       sizeRel: Vector2(0.0625, 0.05),
       posRel: Vector2(0.475, 0.525),
@@ -331,12 +338,13 @@ final Map<String, CharacterConfig> _characterConfigs = {
   ),
   'elite_orc': CharacterConfig(
     id: 'elite_orc',
+    race: CharacterRace.orc,
     spritePath: 'character/Elite Orc.png',
     cellSize: Vector2(100, 100),
     componentSize: Vector2(300, 300),
     maxHp: 30,
     attackValue: 1,
-    speed: 0,
+    speed: 80,
     hitbox: HitboxSpec(
       sizeRel: Vector2(0.0625, 0.05),
       posRel: Vector2(0.475, 0.525),
@@ -391,12 +399,13 @@ final Map<String, CharacterConfig> _characterConfigs = {
   ),
   'orc_rider': CharacterConfig(
     id: 'orc_rider',
+    race: CharacterRace.orc,
     spritePath: 'character/Orc rider.png',
     cellSize: Vector2(100, 100),
     componentSize: Vector2(300, 300),
     maxHp: 40,
     attackValue: 1,
-    speed: 0,
+    speed: 100,
     hitbox: HitboxSpec(
       sizeRel: Vector2(0.0625, 0.05),
       posRel: Vector2(0.475, 0.525),
@@ -451,12 +460,13 @@ final Map<String, CharacterConfig> _characterConfigs = {
   ),
   'orc': CharacterConfig(
     id: 'orc',
+    race: CharacterRace.orc,
     spritePath: 'character/Orc.png',
     cellSize: Vector2(100, 100),
     componentSize: Vector2(300, 300),
     maxHp: 10,
     attackValue: 1,
-    speed: 0,
+    speed: 120,
     hitbox: HitboxSpec(
       sizeRel: Vector2(0.0625, 0.05),
       posRel: Vector2(0.475, 0.525),
@@ -509,4 +519,97 @@ final Map<String, CharacterConfig> _characterConfigs = {
       ),
     ],
   ),
+  'stone_boss': CharacterConfig(
+    id: 'boss',
+    race: CharacterRace.orc,
+    spritePath: 'character/Stone Boss.png',
+    cellSize: Vector2(100, 100),
+    componentSize: Vector2(300, 300),
+    maxHp: 100,
+    attackValue: 5,
+    speed: 100,
+    detectRadius: 1000,
+    attackRange: 1000,
+    hitbox: HitboxSpec(
+      sizeRel: Vector2(0.0625, 0.05),
+      posRel: Vector2(0.475, 0.525),
+    ),
+    animations: {
+      CharacterState.idle: const AnimationSpec(
+        row: 1,
+        stepTime: 0.15,
+        from: 0,
+        to: 8,
+        loop: true,
+      ),
+      CharacterState.run: const AnimationSpec(
+        row: 0,
+        stepTime: 0.10,
+        from: 0,
+        to: 4,
+        loop: true,
+      ),
+      CharacterState.hurt: const AnimationSpec(
+        row: 1,
+        stepTime: 0.05,
+        from: 0,
+        to: 4,
+        loop: false,
+      ),
+      CharacterState.dead: const AnimationSpec(
+        row: 9,
+        stepTime: 0.10,
+        from: 0,
+        to: 4,
+        loop: false,
+      ),
+    },
+    attack: [
+      AttackSpec(
+        id: 'common',
+        damage: 1,
+        duration: 0.4,
+        type: AttackType.melee,
+        sizeRel: Vector2(0.5, 0.5),
+        centerOffsetRel: Vector2(0, -0.25),
+        icon: 'button/sword.png',
+        animation: const AnimationSpec(
+          row: 4,
+          stepTime: 0.1,
+          from: 0,
+          to: 7,
+          loop: false,
+        ),
+      ),
+      AttackSpec(
+        id: 'stone_ball',
+        damage: 3,
+        duration: 3,
+        type: AttackType.ranged,
+        sizeRel: Vector2(1, 1),
+        centerOffsetRel: Vector2(0, 0),
+        bullet: BulletConfig.byId('stone_ball'),
+        icon: 'button/fire.png',
+        animation: AnimationSpec(
+          row: 2,
+          stepTime: 0.05,
+          from: 0,
+          to: 9,
+          loop: false,
+        ),
+      ),
+    ],
+  ),
 };
+
+final Map<CharacterRace, Map<String, CharacterConfig>> _raceConfigs = (() {
+  final map = <CharacterRace, Map<String, CharacterConfig>>{
+    CharacterRace.hero: {},
+    CharacterRace.orc: {},
+    CharacterRace.human: {},
+  };
+  _characterConfigs.forEach((id, cfg) {
+    (map[cfg.race] ??= {})[id] = cfg;
+  });
+  return map;
+})();

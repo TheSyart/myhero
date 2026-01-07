@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" nextlayerid="12" nextobjectid="19">
+<map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="40" height="40" tilewidth="8" tileheight="8" infinite="0" nextlayerid="12" nextobjectid="21">
  <tileset firstgid="1" source="地牢.tsx"/>
  <layer id="1" name="ground" width="40" height="40">
   <data encoding="csv">
@@ -163,5 +163,13 @@
    </properties>
   </object>
  </objectgroup>
- <objectgroup id="9" name="spawn_points"/>
+ <objectgroup id="9" name="spawn_points">
+  <object id="19" x="28.182" y="56.364" width="267.058" height="209.352">
+   <properties>
+    <property name="monsterId" value="stone_boss"/>
+    <property name="perCount" type="int" value="1"/>
+    <property name="type" value="monster_spawn"/>
+   </properties>
+  </object>
+ </objectgroup>
 </map>

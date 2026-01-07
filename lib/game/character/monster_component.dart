@@ -4,6 +4,8 @@ import 'package:flame/collisions.dart';
 import 'package:myhero/game/state/character_state.dart';
 import 'package:myhero/game/character/character_component.dart';
 import 'package:myhero/game/hud/heart/monster_hp_bar_component.dart';
+import 'package:myhero/game/config/drop_config.dart';
+import 'package:myhero/game/component/coin_component.dart';
 import 'package:myhero/utils/ai_util.dart';
 
 class MonsterComponent extends CharacterComponent {
@@ -96,6 +98,16 @@ class MonsterComponent extends CharacterComponent {
     setState(CharacterState.dead);
 
     animationTicker?.onComplete = () {
+      final double roll = rng.nextDouble();
+      if (roll < DropConfig.coinDropRate) {
+        final Vector2 coinPos = position.clone();
+        final coin = CoinComponent(
+          keyId: 'coin',
+          position: coinPos,
+          size: DropConfig.coinSize,
+        );
+        game.world.add(coin);
+      }
       removeFromParent();
     };
   }

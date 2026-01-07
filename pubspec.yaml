@@ -26,6 +26,8 @@ flutter:
     - assets/images/tsx/
     - assets/images/character/
     - assets/images/bullet/
+    - assets/images/ui/
+    - assets/images/hud/
     - assets/images/button/
     - assets/images/map/
     - assets/images/weapon/AK47/

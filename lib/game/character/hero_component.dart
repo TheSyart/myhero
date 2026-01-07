@@ -4,16 +4,35 @@ import 'package:myhero/component/dialog_component.dart';
 import 'package:myhero/game/character/character_component.dart';
 import '../state/character_state.dart';
 import '../../manager/audio_manager.dart';
+import '../interaction/interactable.dart';
 
 class HeroComponent extends CharacterComponent {
   final String heroId;
   final Vector2? birthPosition;
 
+    Interactable? current;
+
+
   HeroComponent({this.heroId = 'hero_default', this.birthPosition})
     : super(characterId: heroId);
 
+
+  void setInteractable(Interactable? obj) {
+    current = obj;
+  }
+
+  void interact() {
+    current?.onInteract(this);
+  }
+
   // ----------------- 钥匙 -----------------
   final Set<String> keys = {};
+  int coins = 0;
+
+  void addCoin(int amount) {
+    coins += amount;
+  }
+
   void addKey(String keyId) {
     keys.add(keyId);
     UiNotify.showToast(game, '获得钥匙: $keyId');

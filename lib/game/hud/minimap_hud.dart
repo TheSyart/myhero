@@ -51,7 +51,7 @@ class MinimapHud extends PositionComponent with HasGameReference<MyGame> {
   // --- 画笔定义 ---
 
   /// 背景画笔（半透明黑色）
-  final Paint _bgPaint = Paint()..color = const Color(0x88000000);
+  final Paint _bgPaint = Paint()..color = const Color.fromARGB(64, 0, 0, 0);
 
   /// 边框画笔（白色线条）
   final Paint _borderPaint = Paint()
@@ -84,11 +84,11 @@ class MinimapHud extends PositionComponent with HasGameReference<MyGame> {
   @override
   Future<void> onLoad() async {
     // 设置小地图尺寸为屏幕宽度的 20%
-    final side = game.size.x * 0.2;
+    final side = game.size.x * 0.15;
     size = Vector2(side, side);
     anchor = Anchor.topRight;
     // 设置位置在右上角，留出 20 像素边距
-    position = Vector2(game.size.x - 20, 20);
+    position = Vector2(game.size.x - 10, 60);
 
     // 监听地图加载事件
     final LevelLoader loader = game.levelLoader;

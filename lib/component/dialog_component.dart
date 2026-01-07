@@ -303,3 +303,46 @@ class RestartOverlay extends PositionComponent
     add(_btn);
   }
 }
+
+class PauseOverlay extends PositionComponent
+    with HasGameReference<MyGame>, TapCallbacks, DragCallbacks {
+  PauseOverlay() : super(priority: 20000);
+
+  @override
+  Future<void> onLoad() async {
+    size = game.size;
+    position = Vector2.zero();
+    final overlay = RectangleComponent(
+      position: Vector2.zero(),
+      size: size.clone(),
+      paint: Paint()..color = Colors.black.withOpacity(0.5),
+      priority: priority,
+    );
+    add(overlay);
+  }
+
+  @override
+  void onTapDown(TapDownEvent event) {
+    event.handled = true;
+  }
+
+  @override
+  void onTapUp(TapUpEvent event) {
+    event.handled = true;
+  }
+
+  @override
+  void onDragStart(DragStartEvent event) {
+    event.handled = true;
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    event.handled = true;
+  }
+
+  @override
+  void onDragEnd(DragEndEvent event) {
+    event.handled = true;
+  }
+}

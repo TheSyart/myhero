@@ -11,6 +11,8 @@ class AttackHud extends PositionComponent {
 
   late final PositionComponent buttonGroup;
   final HeroComponent hero;
+  WeaponButton? _weaponButton;
+  bool _interactMode = false;
 
   AttackHud(this.hero)
     : super(
@@ -36,8 +38,8 @@ class AttackHud extends PositionComponent {
       for (int i = 0; i < count; i++) {
         Vector2 position;
 
-        final skillIndex = i - 1;
-        final skillCount = count - 1;
+        final skillIndex = i;
+        final skillCount = count;
 
         final t = skillCount <= 1 ? 0.5 : skillIndex / (skillCount - 1);
 
@@ -56,14 +58,7 @@ class AttackHud extends PositionComponent {
       }
     }
 
-    final weapon = hero.weapon;
-    final weaponIcon = weapon?.config.attack.icon ?? '';
-    final weaponButton = WeaponButton(
-      hero: hero,
-      icon: weaponIcon,
-      onPressed: () => _weaponAttack(),
-    )..position = Vector2.zero();
-    buttonGroup.add(weaponButton);
+    _buildWeaponOrInteractButton();
 
     add(buttonGroup);
   }
@@ -74,5 +69,43 @@ class AttackHud extends PositionComponent {
 
   void _weaponAttack() {
     hero.weapon?.attack();
+  }
+
+  void _buildWeaponOrInteractButton() {
+    _weaponButton?.removeFromParent();
+    final hasWeapon = hero.weapon != null;
+    final hasInteractable = hero.current != null;
+
+    if (hasInteractable) {
+      // 进入交互模式：使用一个交互图标，并点击触发 hero.interact()
+      _interactMode = true;
+      _weaponButton = WeaponButton(
+        hero: hero,
+        icon: 'ui/Exclamation-Mark.png',
+        onPressed: () => hero.interact(),
+      )..position = Vector2.zero();
+    } else {
+      // 非交互模式：显示武器图标，如果没有武器则为空按钮（保留圆圈占位）
+      _interactMode = false;
+      final weaponIcon = hasWeapon
+          ? 'ui/Attack.png'
+          : 'ui/Slash.png';
+      _weaponButton = WeaponButton(
+        hero: hero,
+        icon: weaponIcon,
+        onPressed: () => _weaponAttack(),
+      )..position = Vector2.zero();
+    }
+    buttonGroup.add(_weaponButton!);
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    // 根据 hero.current 的存在性在武器/交互模式之间切换
+    final needInteract = hero.current != null;
+    if (needInteract != _interactMode) {
+      _buildWeaponOrInteractButton();
+    }
   }
 }

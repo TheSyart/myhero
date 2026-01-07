@@ -28,6 +28,7 @@ import 'dart:math';
 /// - 弓箭、魔法球、枪械子弹等远程攻击。
 /// - 需要直线飞行且射程受限的投射物。
 class BulletHitbox extends AbstractAttackRect {
+  late final RectangleHitbox hitbox;
   final BulletConfig config;
   Vector2 direction;
 
@@ -52,18 +53,23 @@ class BulletHitbox extends AbstractAttackRect {
          removeOnHit: !config.penetrate,
          anchor: Anchor.center,
        ) {
-    add(RectangleHitbox()..collisionType = CollisionType.active);
+
+    hitbox = RectangleHitbox.relative(
+      config.sizeRel, // 相对于父组件大小
+      parentSize: size,
+      position: Vector2(
+        size.x * config.centerOffsetRel.x,
+        size.y * config.centerOffsetRel.y,
+      ), // 中心位置
+      anchor: Anchor.center,
+    );
+    add(hitbox);
   }
 
   bool _locked = false;
 
   @override
-  ui.Rect getAttackRect() => ui.Rect.fromLTWH(
-    position.x - size.x / 2,
-    position.y - size.y / 2,
-    size.x,
-    size.y,
-  );
+  ui.Rect getAttackRect() => hitbox.toAbsoluteRect();
 
   @override
   void onLockTargetFound() {

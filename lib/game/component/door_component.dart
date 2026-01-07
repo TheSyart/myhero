@@ -9,6 +9,7 @@ import 'package:myhero/manager/audio_manager.dart';
 class DoorComponent extends BlockerComponent with HasGameReference<MyGame> {
   final String keyId;
   bool isOpen;
+  bool _forceLocked = false;
   double _knockCooldownLeft = 0;
 
   DoorComponent({
@@ -24,14 +25,31 @@ class DoorComponent extends BlockerComponent with HasGameReference<MyGame> {
     sprite = await Sprite.load(isOpen ? 'open_door.png' : 'closed_door.png');
   }
 
-  void _unlock() async {
+  Future<void> open() async {
+    _unlock(force: true);
+  }
+
+  Future<void> close() async {
+    if (isOpen) {
+      isOpen = false;
+      sprite = await Sprite.load('closed_door.png');
+      if (hitbox.parent == null) {
+        add(hitbox);
+      }
+    }
+  }
+
+  void setLocked(bool locked) {
+    _forceLocked = locked;
+  }
+
+  void _unlock({bool force = false}) async {
     if (!isOpen) {
+      if (_forceLocked && !force) return;
       isOpen = true;
-      await AudioManager.playDoorOpen();
       sprite = await Sprite.load('open_door.png');
 
-      // 延迟一小段时间，模拟开门动画时间
-      await Future.delayed(const Duration(milliseconds: 20000));
+      await AudioManager.playDoorOpen();
 
       hitbox.removeFromParent();
     }
@@ -39,8 +57,9 @@ class DoorComponent extends BlockerComponent with HasGameReference<MyGame> {
 
   void attemptOpen(CharacterComponent character) {
     if (character is! HeroComponent) return;
-    if (!isOpen && character.hasKey(keyId) || keyId.isEmpty) {
-      _unlock();
+    if (_forceLocked) return;
+    if ((!isOpen && character.hasKey(keyId)) || keyId.isEmpty) {
+      _unlock(force: false);
     } else if (!isOpen) {
       if (_knockCooldownLeft > 0) return;
       _knockCooldownLeft = 1.0;
